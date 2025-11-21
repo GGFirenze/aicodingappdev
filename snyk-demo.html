@@ -1288,20 +1288,12 @@
                     analyticsInitialized = true;
 
                     // Track initial page view
-                    segmentAnalytics.page('Dashboard', {
-                        title: 'Snyk Dashboard',
+                    segmentAnalytics.track('Page Viewed', {
+                        page_name: 'overview',
+                        page_title: 'Snyk Dashboard',
                         url: window.location.href,
-                        userId: currentUser.userId
-                    });
-
-                    // Track analytics initialized
-                    segmentAnalytics.track('Analytics Initialized', {
-                        source: 'segment',
-                        sessionReplayEnabled: true,
-                        experimentEnabled: true,
-                        deviceId: deviceId,
-                        sessionId: initialSessionId,
-                        userId: currentUser.userId
+                        userId: currentUser.userId,
+                        organization: currentUser.organization
                     });
 
                     console.log('✅ All SDKs initialized successfully!');
@@ -1331,15 +1323,6 @@
             document.getElementById('cookie-consent-banner').style.display = 'none';
             
             initializeAnalytics();
-
-            setTimeout(() => {
-                if (segmentAnalytics) {
-                    segmentAnalytics.track('Cookie Consent Given', {
-                        consent_type: 'accepted',
-                        timestamp: new Date().toISOString()
-                    });
-                }
-            }, 100);
         });
 
         document.getElementById('decline-cookies').addEventListener('click', function() {
@@ -1385,9 +1368,10 @@
                 document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
                 document.getElementById(targetPage + '-page').classList.add('active');
 
-                // Track page view (separate event)
-                segmentAnalytics.page(targetPage.charAt(0).toUpperCase() + targetPage.slice(1), {
-                    title: 'Snyk - ' + targetPage,
+                // Track page view as explicit event (separate from action)
+                trackEvent('Page Viewed', {
+                    page_name: targetPage,
+                    page_title: 'Snyk - ' + targetPage,
                     url: window.location.href + '#' + targetPage
                 });
             });
@@ -1499,29 +1483,6 @@
             trackEvent('User Avatar Clicked', {
                 user_id: currentUser.userId
             });
-        });
-
-        // Scroll Depth Tracking
-        let maxScroll = 0;
-        const scrollMilestones = [25, 50, 75, 100];
-        const trackedMilestones = new Set();
-
-        window.addEventListener('scroll', function() {
-            const scrollPercentage = Math.round((window.scrollY / (document.documentElement.scrollHeight - window.innerHeight)) * 100);
-            
-            if (scrollPercentage > maxScroll) {
-                maxScroll = scrollPercentage;
-                
-                scrollMilestones.forEach(milestone => {
-                    if (scrollPercentage >= milestone && !trackedMilestones.has(milestone)) {
-                        trackedMilestones.add(milestone);
-                        trackEvent('Scroll Depth Reached', {
-                            percentage: milestone,
-                            page: document.querySelector('.sidebar-nav.active').getAttribute('data-page')
-                        });
-                    }
-                });
-            }
         });
     </script>
 </body>
