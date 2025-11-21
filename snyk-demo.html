@@ -1,0 +1,1495 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Snyk - Developer security | Develop fast. Stay secure.</title>
+    <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🔒</text></svg>">
+    
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+            color: #1a1a1a;
+            line-height: 1.6;
+            background: #ffffff;
+        }
+
+        /* Cookie Consent Banner */
+        #cookie-consent-banner {
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            background: rgba(26, 26, 26, 0.98);
+            backdrop-filter: blur(10px);
+            color: white;
+            padding: 24px;
+            z-index: 10000;
+            box-shadow: 0 -4px 20px rgba(0, 0, 0, 0.15);
+            animation: slideUp 0.3s ease;
+        }
+
+        @keyframes slideUp {
+            from { transform: translateY(100%); }
+            to { transform: translateY(0); }
+        }
+
+        .cookie-content {
+            max-width: 1200px;
+            margin: 0 auto;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 24px;
+            flex-wrap: wrap;
+        }
+
+        .cookie-text {
+            flex: 1;
+            min-width: 300px;
+        }
+
+        .cookie-text h3 {
+            font-size: 18px;
+            margin-bottom: 8px;
+        }
+
+        .cookie-text p {
+            font-size: 14px;
+            color: #d4d4d4;
+            line-height: 1.5;
+        }
+
+        .cookie-buttons {
+            display: flex;
+            gap: 12px;
+        }
+
+        .cookie-btn {
+            padding: 12px 28px;
+            border: none;
+            border-radius: 8px;
+            font-size: 15px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .cookie-accept {
+            background: #5b47d6;
+            color: white;
+        }
+
+        .cookie-accept:hover {
+            background: #4a38c2;
+            transform: translateY(-1px);
+        }
+
+        .cookie-decline {
+            background: transparent;
+            color: white;
+            border: 2px solid #555;
+        }
+
+        .cookie-decline:hover {
+            border-color: #888;
+        }
+
+        /* Header */
+        header {
+            background: white;
+            padding: 16px 40px;
+            border-bottom: 1px solid #e5e5e5;
+            position: sticky;
+            top: 0;
+            z-index: 1000;
+        }
+
+        nav {
+            max-width: 1400px;
+            margin: 0 auto;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        .logo {
+            font-size: 28px;
+            font-weight: 700;
+            color: #5b47d6;
+            text-decoration: none;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .nav-links {
+            display: flex;
+            gap: 32px;
+            list-style: none;
+            align-items: center;
+        }
+
+        .nav-links a {
+            color: #1a1a1a;
+            text-decoration: none;
+            font-size: 15px;
+            transition: color 0.2s;
+            font-weight: 500;
+        }
+
+        .nav-links a:hover {
+            color: #5b47d6;
+        }
+
+        .nav-right {
+            display: flex;
+            gap: 16px;
+            align-items: center;
+        }
+
+        .btn {
+            padding: 10px 20px;
+            border-radius: 6px;
+            font-size: 14px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s;
+            text-decoration: none;
+            display: inline-block;
+            border: none;
+        }
+
+        .btn-primary {
+            background: #5b47d6;
+            color: white;
+        }
+
+        .btn-primary:hover {
+            background: #4a38c2;
+            transform: translateY(-1px);
+        }
+
+        .btn-secondary {
+            background: transparent;
+            color: #1a1a1a;
+            border: 1.5px solid #d4d4d4;
+        }
+
+        .btn-secondary:hover {
+            border-color: #5b47d6;
+            color: #5b47d6;
+        }
+
+        /* User Avatar */
+        .user-avatar {
+            width: 32px;
+            height: 32px;
+            border-radius: 50%;
+            background: #5b47d6;
+            color: white;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 600;
+            font-size: 14px;
+            cursor: pointer;
+        }
+
+        /* Dashboard Layout */
+        .dashboard-layout {
+            display: flex;
+            min-height: calc(100vh - 65px);
+        }
+
+        /* Sidebar */
+        .sidebar {
+            width: 240px;
+            background: #fafafa;
+            border-right: 1px solid #e5e5e5;
+            padding: 24px 0;
+        }
+
+        .sidebar-section {
+            margin-bottom: 32px;
+            padding: 0 20px;
+        }
+
+        .sidebar-label {
+            font-size: 11px;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            color: #999;
+            margin-bottom: 12px;
+        }
+
+        .sidebar-org {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            padding: 8px 12px;
+            border-radius: 6px;
+            background: white;
+            border: 1px solid #e5e5e5;
+            margin-bottom: 4px;
+        }
+
+        .org-icon {
+            width: 24px;
+            height: 24px;
+            border-radius: 4px;
+            background: #5b47d6;
+            color: white;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 12px;
+            font-weight: 600;
+        }
+
+        .org-name {
+            font-size: 14px;
+            font-weight: 600;
+        }
+
+        .sidebar-menu {
+            list-style: none;
+        }
+
+        .sidebar-menu li {
+            margin-bottom: 4px;
+        }
+
+        .sidebar-menu a {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            padding: 8px 12px;
+            border-radius: 6px;
+            color: #666;
+            text-decoration: none;
+            font-size: 14px;
+            transition: all 0.2s;
+        }
+
+        .sidebar-menu a:hover {
+            background: #f0f0f0;
+            color: #1a1a1a;
+        }
+
+        .sidebar-menu a.active {
+            background: #5b47d6;
+            color: white;
+        }
+
+        /* Main Content */
+        .main-content {
+            flex: 1;
+            padding: 40px;
+            overflow-y: auto;
+        }
+
+        /* Page Container */
+        .page-container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        /* Breadcrumb */
+        .breadcrumb {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            margin-bottom: 24px;
+            font-size: 14px;
+            color: #666;
+        }
+
+        .breadcrumb a {
+            color: #666;
+            text-decoration: none;
+        }
+
+        .breadcrumb a:hover {
+            color: #5b47d6;
+        }
+
+        /* Page Header */
+        .page-header {
+            margin-bottom: 40px;
+        }
+
+        .page-header h1 {
+            font-size: 32px;
+            margin-bottom: 12px;
+        }
+
+        .page-header p {
+            font-size: 16px;
+            color: #666;
+        }
+
+        /* Cards Grid */
+        .cards-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+            gap: 24px;
+            margin-bottom: 40px;
+        }
+
+        .card {
+            background: white;
+            border: 1px solid #e5e5e5;
+            border-radius: 12px;
+            padding: 32px;
+            transition: all 0.3s;
+        }
+
+        .card:hover {
+            border-color: #5b47d6;
+            box-shadow: 0 8px 24px rgba(91, 71, 214, 0.1);
+            transform: translateY(-2px);
+        }
+
+        .card h3 {
+            font-size: 20px;
+            margin-bottom: 16px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .card p {
+            font-size: 14px;
+            color: #666;
+            line-height: 1.6;
+            margin-bottom: 20px;
+        }
+
+        .card ul {
+            list-style: none;
+            margin-bottom: 24px;
+        }
+
+        .card ul li {
+            font-size: 14px;
+            color: #666;
+            padding: 8px 0;
+            border-bottom: 1px solid #f0f0f0;
+        }
+
+        .card ul li:last-child {
+            border-bottom: none;
+        }
+
+        .card ul li::before {
+            content: '•';
+            color: #5b47d6;
+            font-weight: bold;
+            display: inline-block;
+            width: 1em;
+            margin-left: -1em;
+        }
+
+        /* Widgets Section */
+        .widgets-section {
+            margin-top: 40px;
+        }
+
+        .widgets-section h2 {
+            font-size: 24px;
+            margin-bottom: 24px;
+        }
+
+        .widget {
+            background: white;
+            border: 1px solid #e5e5e5;
+            border-radius: 12px;
+            padding: 24px;
+            margin-bottom: 24px;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .widget:hover {
+            border-color: #5b47d6;
+            box-shadow: 0 4px 12px rgba(91, 71, 214, 0.1);
+        }
+
+        .widget-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 16px;
+        }
+
+        .widget-title {
+            font-size: 18px;
+            font-weight: 600;
+        }
+
+        .widget-badge {
+            padding: 4px 12px;
+            border-radius: 12px;
+            font-size: 12px;
+            font-weight: 600;
+        }
+
+        .badge-critical {
+            background: #fee;
+            color: #c00;
+        }
+
+        .badge-high {
+            background: #fef4e6;
+            color: #c97900;
+        }
+
+        .badge-medium {
+            background: #fff9e6;
+            color: #8a6400;
+        }
+
+        .badge-low {
+            background: #e6f9e6;
+            color: #2d7d2d;
+        }
+
+        .widget-stats {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 16px;
+        }
+
+        .stat-item {
+            text-align: center;
+        }
+
+        .stat-value {
+            font-size: 24px;
+            font-weight: 700;
+            margin-bottom: 4px;
+        }
+
+        .stat-label {
+            font-size: 12px;
+            color: #666;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        /* Code Block */
+        .code-block {
+            background: #1a1a1a;
+            color: #00ff00;
+            padding: 20px;
+            border-radius: 8px;
+            font-family: 'Courier New', monospace;
+            font-size: 13px;
+            line-height: 1.6;
+            overflow-x: auto;
+        }
+
+        .code-line {
+            display: block;
+            margin: 4px 0;
+        }
+
+        /* Integration Banner */
+        .integration-banner {
+            background: linear-gradient(135deg, #5b47d6 0%, #7c6be5 100%);
+            color: white;
+            padding: 40px;
+            border-radius: 12px;
+            margin-bottom: 40px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .integration-banner h2 {
+            font-size: 28px;
+            margin-bottom: 12px;
+        }
+
+        .integration-banner p {
+            font-size: 16px;
+            opacity: 0.9;
+        }
+
+        /* Projects List */
+        .projects-list {
+            margin-top: 32px;
+        }
+
+        .project-item {
+            background: white;
+            border: 1px solid #e5e5e5;
+            border-radius: 8px;
+            padding: 20px;
+            margin-bottom: 12px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .project-item:hover {
+            border-color: #5b47d6;
+            box-shadow: 0 2px 8px rgba(91, 71, 214, 0.1);
+        }
+
+        .project-info h4 {
+            font-size: 16px;
+            margin-bottom: 6px;
+        }
+
+        .project-info p {
+            font-size: 13px;
+            color: #666;
+        }
+
+        .project-stats {
+            display: flex;
+            gap: 24px;
+            align-items: center;
+        }
+
+        .project-stat {
+            text-align: center;
+        }
+
+        .project-stat-value {
+            font-size: 18px;
+            font-weight: 700;
+        }
+
+        .project-stat-label {
+            font-size: 11px;
+            color: #666;
+            text-transform: uppercase;
+        }
+
+        /* Hidden by default */
+        .page {
+            display: none;
+        }
+
+        .page.active {
+            display: block;
+        }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            .dashboard-layout {
+                flex-direction: column;
+            }
+
+            .sidebar {
+                width: 100%;
+                border-right: none;
+                border-bottom: 1px solid #e5e5e5;
+            }
+
+            .main-content {
+                padding: 20px;
+            }
+
+            .cards-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .widget-stats {
+                grid-template-columns: repeat(2, 1fr);
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Cookie Consent Banner -->
+    <div id="cookie-consent-banner" style="display: none;">
+        <div class="cookie-content">
+            <div class="cookie-text">
+                <h3>🍪 We value your privacy</h3>
+                <p>We use cookies and analytics to improve your experience. We use Segment, Amplitude Analytics, Session Replay, and Guides & Surveys to understand how you interact with Snyk. By clicking "Accept", you consent to our use of cookies and analytics.</p>
+            </div>
+            <div class="cookie-buttons">
+                <button class="cookie-btn cookie-decline" id="decline-cookies">Decline</button>
+                <button class="cookie-btn cookie-accept" id="accept-cookies">Accept All</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Header -->
+    <header>
+        <nav>
+            <a href="#" class="logo">🔒 Snyk</a>
+            <ul class="nav-links">
+                <li><a href="#" class="nav-link" data-link="products">Products</a></li>
+                <li><a href="#" class="nav-link" data-link="solutions">Solutions</a></li>
+                <li><a href="#" class="nav-link" data-link="docs">Docs</a></li>
+                <li><a href="#" class="nav-link" data-link="pricing">Pricing</a></li>
+            </ul>
+            <div class="nav-right">
+                <a href="#" class="btn btn-secondary" id="contact-sales-btn">Contact sales</a>
+                <div class="user-avatar" id="user-avatar" title="Giuliano Giannini">GG</div>
+            </div>
+        </nav>
+    </header>
+
+    <!-- Dashboard Layout -->
+    <div class="dashboard-layout">
+        <!-- Sidebar -->
+        <aside class="sidebar">
+            <div class="sidebar-section">
+                <div class="sidebar-label">Organization</div>
+                <div class="sidebar-org">
+                    <div class="org-icon">G</div>
+                    <div class="org-name">ggfrenze</div>
+                </div>
+            </div>
+            
+            <div class="sidebar-section">
+                <ul class="sidebar-menu">
+                    <li><a href="#" class="sidebar-nav active" data-page="overview">📊 Dashboard</a></li>
+                    <li><a href="#" class="sidebar-nav" data-page="projects">📁 Projects</a></li>
+                    <li><a href="#" class="sidebar-nav" data-page="reports">📈 Reports</a></li>
+                    <li><a href="#" class="sidebar-nav" data-page="integrations">🔌 Integrations</a></li>
+                    <li><a href="#" class="sidebar-nav" data-page="settings">⚙️ Settings</a></li>
+                </ul>
+            </div>
+        </aside>
+
+        <!-- Main Content -->
+        <main class="main-content">
+            <!-- Overview Page -->
+            <div class="page active" id="overview-page">
+                <div class="page-container">
+                    <div class="breadcrumb">
+                        <a href="#">ggfrenze</a>
+                        <span>›</span>
+                        <span>Projects</span>
+                    </div>
+
+                    <div class="page-header">
+                        <h1>Secure your dependencies with Snyk</h1>
+                        <p>Scan your projects to get started.</p>
+                    </div>
+
+                    <div class="cards-grid">
+                        <!-- Card 1: Monitor Deployed Apps -->
+                        <div class="card" id="card-monitor-apps">
+                            <h3>🚀 Monitor deployed apps</h3>
+                            <ul>
+                                <li>Test apps for vulnerable dependencies</li>
+                                <li>Get notifications about new vulnerabilities</li>
+                            </ul>
+                            <button class="btn btn-primary card-action-btn" data-card="monitor-apps" data-action="browse-integrations">Browse integrations</button>
+                        </div>
+
+                        <!-- Card 2: Protect Source Code -->
+                        <div class="card" id="card-protect-code">
+                            <h3>🛡️ Protect your source code</h3>
+                            <ul>
+                                <li>Test repos for vulnerable dependencies</li>
+                                <li>Create pull requests with fixes and patches</li>
+                                <li>Flag fix pull requests that add new vulnerabilities</li>
+                                <li>Get notifications for new vulnerabilities</li>
+                            </ul>
+                            <button class="btn btn-primary card-action-btn" data-card="protect-code" data-action="add-projects">Add projects</button>
+                        </div>
+
+                        <!-- Card 3: Monitor Local Projects -->
+                        <div class="card" id="card-monitor-local">
+                            <h3>💻 Monitor local projects</h3>
+                            <p>Install our CLI tool to monitor local projects for known vulnerabilities.</p>
+                            <div class="code-block">
+                                <span class="code-line">npm install -g snyk</span>
+                                <span class="code-line">cd ~/projects/my-project/</span>
+                                <span class="code-line">snyk monitor</span>
+                            </div>
+                            <a href="#" class="btn btn-secondary" id="view-cli-docs-btn" style="margin-top: 16px; display: inline-block;">Full documentation for Snyk CLI</a>
+                        </div>
+                    </div>
+
+                    <!-- Widgets Section -->
+                    <div class="widgets-section">
+                        <h2>Security Overview</h2>
+                        
+                        <div class="widget" id="widget-vulnerabilities" data-widget="vulnerabilities">
+                            <div class="widget-header">
+                                <div class="widget-title">📦 Dependencies Vulnerabilities</div>
+                                <div class="widget-badge badge-high">38 High</div>
+                            </div>
+                            <div class="widget-stats">
+                                <div class="stat-item">
+                                    <div class="stat-value" style="color: #c00;">12</div>
+                                    <div class="stat-label">Critical</div>
+                                </div>
+                                <div class="stat-item">
+                                    <div class="stat-value" style="color: #c97900;">38</div>
+                                    <div class="stat-label">High</div>
+                                </div>
+                                <div class="stat-item">
+                                    <div class="stat-value" style="color: #8a6400;">67</div>
+                                    <div class="stat-label">Medium</div>
+                                </div>
+                                <div class="stat-item">
+                                    <div class="stat-value" style="color: #2d7d2d;">24</div>
+                                    <div class="stat-label">Low</div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="widget" id="widget-code-security" data-widget="code-security">
+                            <div class="widget-header">
+                                <div class="widget-title">🔍 Code Security</div>
+                                <div class="widget-badge badge-medium">15 Medium</div>
+                            </div>
+                            <div class="widget-stats">
+                                <div class="stat-item">
+                                    <div class="stat-value" style="color: #c00;">3</div>
+                                    <div class="stat-label">Critical</div>
+                                </div>
+                                <div class="stat-item">
+                                    <div class="stat-value" style="color: #c97900;">8</div>
+                                    <div class="stat-label">High</div>
+                                </div>
+                                <div class="stat-item">
+                                    <div class="stat-value" style="color: #8a6400;">15</div>
+                                    <div class="stat-label">Medium</div>
+                                </div>
+                                <div class="stat-item">
+                                    <div class="stat-value" style="color: #2d7d2d;">7</div>
+                                    <div class="stat-label">Low</div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="widget" id="widget-license-compliance" data-widget="license-compliance">
+                            <div class="widget-header">
+                                <div class="widget-title">⚖️ License Compliance</div>
+                                <div class="widget-badge badge-low">All Clear</div>
+                            </div>
+                            <div class="widget-stats">
+                                <div class="stat-item">
+                                    <div class="stat-value">456</div>
+                                    <div class="stat-label">Total Licenses</div>
+                                </div>
+                                <div class="stat-item">
+                                    <div class="stat-value" style="color: #2d7d2d;">0</div>
+                                    <div class="stat-label">Issues</div>
+                                </div>
+                                <div class="stat-item">
+                                    <div class="stat-value">12</div>
+                                    <div class="stat-label">Types</div>
+                                </div>
+                                <div class="stat-item">
+                                    <div class="stat-value">98%</div>
+                                    <div class="stat-label">Compliant</div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Projects Page -->
+            <div class="page" id="projects-page">
+                <div class="page-container">
+                    <div class="breadcrumb">
+                        <a href="#">ggfrenze</a>
+                        <span>›</span>
+                        <span>All Projects</span>
+                    </div>
+
+                    <div class="page-header">
+                        <h1>All Projects</h1>
+                        <p>Manage and monitor your organization's projects.</p>
+                    </div>
+
+                    <button class="btn btn-primary" id="add-new-project-btn" style="margin-bottom: 24px;">+ Add New Project</button>
+
+                    <div class="projects-list">
+                        <div class="project-item" data-project="frontend-app">
+                            <div class="project-info">
+                                <h4>frontend-app</h4>
+                                <p>React • Updated 2 hours ago</p>
+                            </div>
+                            <div class="project-stats">
+                                <div class="project-stat">
+                                    <div class="project-stat-value" style="color: #c00;">8</div>
+                                    <div class="project-stat-label">Critical</div>
+                                </div>
+                                <div class="project-stat">
+                                    <div class="project-stat-value" style="color: #c97900;">15</div>
+                                    <div class="project-stat-label">High</div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="project-item" data-project="backend-api">
+                            <div class="project-info">
+                                <h4>backend-api</h4>
+                                <p>Node.js • Updated 5 hours ago</p>
+                            </div>
+                            <div class="project-stats">
+                                <div class="project-stat">
+                                    <div class="project-stat-value" style="color: #c00;">4</div>
+                                    <div class="project-stat-label">Critical</div>
+                                </div>
+                                <div class="project-stat">
+                                    <div class="project-stat-value" style="color: #c97900;">23</div>
+                                    <div class="project-stat-label">High</div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="project-item" data-project="mobile-app">
+                            <div class="project-info">
+                                <h4>mobile-app</h4>
+                                <p>React Native • Updated 1 day ago</p>
+                            </div>
+                            <div class="project-stats">
+                                <div class="project-stat">
+                                    <div class="project-stat-value" style="color: #2d7d2d;">0</div>
+                                    <div class="project-stat-label">Critical</div>
+                                </div>
+                                <div class="project-stat">
+                                    <div class="project-stat-value" style="color: #2d7d2d;">0</div>
+                                    <div class="project-stat-label">High</div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Reports Page -->
+            <div class="page" id="reports-page">
+                <div class="page-container">
+                    <div class="breadcrumb">
+                        <a href="#">ggfrenze</a>
+                        <span>›</span>
+                        <span>Reports</span>
+                    </div>
+
+                    <div class="page-header">
+                        <h1>Security Reports</h1>
+                        <p>Detailed security insights and trends for your organization.</p>
+                    </div>
+
+                    <div class="integration-banner">
+                        <div>
+                            <h2>Advanced Reporting Available</h2>
+                            <p>Upgrade to Enterprise to unlock advanced security analytics and reporting features.</p>
+                        </div>
+                        <button class="btn btn-primary" id="upgrade-enterprise-btn">Upgrade to Enterprise</button>
+                    </div>
+
+                    <div class="cards-grid">
+                        <div class="card">
+                            <h3>📊 Vulnerability Trends</h3>
+                            <p>Track how vulnerabilities change over time across your organization.</p>
+                            <button class="btn btn-secondary">View Report</button>
+                        </div>
+
+                        <div class="card">
+                            <h3>🎯 Security Posture</h3>
+                            <p>Understand your overall security posture and areas for improvement.</p>
+                            <button class="btn btn-secondary">View Report</button>
+                        </div>
+
+                        <div class="card">
+                            <h3>📈 Remediation Progress</h3>
+                            <p>Monitor how quickly your team addresses security issues.</p>
+                            <button class="btn btn-secondary">View Report</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Integrations Page -->
+            <div class="page" id="integrations-page">
+                <div class="page-container">
+                    <div class="breadcrumb">
+                        <a href="#">ggfrenze</a>
+                        <span>›</span>
+                        <span>Integrations</span>
+                    </div>
+
+                    <div class="page-header">
+                        <h1>Integrations</h1>
+                        <p>Connect Snyk with your development tools and workflows.</p>
+                    </div>
+
+                    <div class="cards-grid">
+                        <div class="card">
+                            <h3>🐙 GitHub</h3>
+                            <p>Automatically test and monitor your GitHub repositories.</p>
+                            <button class="btn btn-primary">Connect GitHub</button>
+                        </div>
+
+                        <div class="card">
+                            <h3>🦊 GitLab</h3>
+                            <p>Integrate Snyk security scanning into your GitLab workflow.</p>
+                            <button class="btn btn-primary">Connect GitLab</button>
+                        </div>
+
+                        <div class="card">
+                            <h3>☁️ AWS</h3>
+                            <p>Monitor your AWS cloud infrastructure for security issues.</p>
+                            <button class="btn btn-primary">Connect AWS</button>
+                        </div>
+
+                        <div class="card">
+                            <h3>📦 npm</h3>
+                            <p>Scan your npm packages for known vulnerabilities.</p>
+                            <button class="btn btn-primary">Connect npm</button>
+                        </div>
+
+                        <div class="card">
+                            <h3>🐋 Docker Hub</h3>
+                            <p>Secure your container images with automated scanning.</p>
+                            <button class="btn btn-primary">Connect Docker Hub</button>
+                        </div>
+
+                        <div class="card">
+                            <h3>☸️ Kubernetes</h3>
+                            <p>Monitor your Kubernetes workloads for security risks.</p>
+                            <button class="btn btn-primary">Connect Kubernetes</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Settings Page -->
+            <div class="page" id="settings-page">
+                <div class="page-container">
+                    <div class="breadcrumb">
+                        <a href="#">ggfrenze</a>
+                        <span>›</span>
+                        <span>Settings</span>
+                    </div>
+
+                    <div class="page-header">
+                        <h1>Organization Settings</h1>
+                        <p>Manage your organization's security policies and preferences.</p>
+                    </div>
+
+                    <div class="cards-grid">
+                        <div class="card">
+                            <h3>👥 Team Members</h3>
+                            <p>Manage team member access and permissions.</p>
+                            <button class="btn btn-secondary">Manage Team</button>
+                        </div>
+
+                        <div class="card">
+                            <h3>🔔 Notifications</h3>
+                            <p>Configure alert preferences and notification channels.</p>
+                            <button class="btn btn-secondary">Configure Notifications</button>
+                        </div>
+
+                        <div class="card">
+                            <h3>🎯 Security Policies</h3>
+                            <p>Define security policies and compliance requirements.</p>
+                            <button class="btn btn-secondary">Edit Policies</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <!-- Segment Analytics -->
+    <script>
+        !function(){var i="analytics",analytics=window[i]=window[i]||[];if(!analytics.initialize)if(analytics.invoked)window.console&&console.error&&console.error("Segment snippet included twice.");else{analytics.invoked=!0;analytics.methods=["trackSubmit","trackClick","trackLink","trackForm","pageview","identify","reset","group","track","ready","alias","debug","page","screen","once","off","on","addSourceMiddleware","addIntegrationMiddleware","setAnonymousId","addDestinationMiddleware","register"];analytics.factory=function(e){return function(){if(window[i].initialized)return window[i][e].apply(window[i],arguments);var n=Array.prototype.slice.call(arguments);if(["track","screen","alias","group","page","identify"].indexOf(e)>-1){var c=document.querySelector("link[rel='canonical']");n.push({__t:"bpc",c:c&&c.getAttribute("href")||void 0,p:location.pathname,u:location.href,s:location.search,t:document.title,r:document.referrer})}n.unshift(e);analytics.push(n);return analytics}};for(var n=0;n<analytics.methods.length;n++){var key=analytics.methods[n];analytics[key]=analytics.factory(key)}analytics.load=function(key,n){var t=document.createElement("script");t.type="text/javascript";t.async=!0;t.setAttribute("data-global-segment-analytics-key",i);t.src="https://cdn.segment.com/analytics.js/v1/" + key + "/analytics.min.js";var r=document.getElementsByTagName("script")[0];r.parentNode.insertBefore(t,r);analytics._loadOptions=n};analytics._writeKey="am2UEcXHgbVEzMc6RpWqS7h2thTQaYt9";;analytics.SNIPPET_VERSION="5.2.0";
+        // Note: analytics.load() will be called only after cookie consent
+        }}();
+    </script>
+    
+    <!-- Amplitude Session Replay Standalone SDK -->
+    <script src="https://cdn.amplitude.com/libs/session-replay-browser-1.20.1-min.js.gz"></script>
+    
+    <!-- Amplitude Experiment SDK -->
+    <script src="https://unpkg.com/@amplitude/experiment-js-client@1.10.0/dist/experiment.umd.js"></script>
+
+    <script>
+        // Cookie helper functions
+        const cookie = {
+            set: function(name, value, days = 365) {
+                const expires = new Date(Date.now() + days * 864e5).toUTCString();
+                document.cookie = name + '=' + encodeURIComponent(value) + '; expires=' + expires + '; path=/';
+            },
+            get: function(name) {
+                return document.cookie.split('; ').reduce((r, v) => {
+                    const parts = v.split('=');
+                    return parts[0] === name ? decodeURIComponent(parts[1]) : r;
+                }, '');
+            },
+            delete: function(name) {
+                this.set(name, '', -1);
+            }
+        };
+
+        // Configuration
+        const SEGMENT_WRITE_KEY = 'am2UEcXHgbVEzMc6RpWqS7h2thTQaYt9';
+        const AMPLITUDE_API_KEY = '9bf08b5d583a19a8b51cb9900780d4c8';
+        const EXPERIMENT_DEPLOYMENT_KEY = 'client-IjJVrVmxcXVWYRKoZF4FbLCbEdKmPTQv'; // You'll need to create this in Amplitude Experiment
+
+        let analyticsInitialized = false;
+        let segmentAnalytics = window.analytics;
+        let sessionReplayInstance = null;
+        let experimentClient = null;
+
+        // User identification (GitHub login already completed)
+        const currentUser = {
+            userId: 'giuliano_giannini',
+            email: 'giuliano.giannini@amplitude.com',
+            name: 'Giuliano Giannini',
+            organization: 'ggfrenze',
+            plan: 'free' // For cohort targeting
+        };
+
+        // Initialize analytics (only after consent)
+        async function initializeAnalytics() {
+            if (analyticsInitialized) return;
+
+            try {
+                console.log('🚀 Initializing Segment Analytics, Session Replay, Experiment & Guides/Surveys...');
+
+                // Load Segment analytics after consent
+                segmentAnalytics.load(SEGMENT_WRITE_KEY);
+                
+                // Identify the user
+                segmentAnalytics.identify(currentUser.userId, {
+                    email: currentUser.email,
+                    name: currentUser.name,
+                    organization: currentUser.organization,
+                    plan: currentUser.plan
+                });
+
+                // Helper function to get stored session ID
+                const getStoredSessionId = () => {
+                    return cookie.get("analytics_session_id") || 0;
+                };
+
+                // Wait for Segment to be fully loaded
+                segmentAnalytics.ready(async function() {
+                    await new Promise(resolve => setTimeout(resolve, 1000));
+                    
+                    const storedSessionId = getStoredSessionId();
+                    
+                    // CRITICAL: Get device ID from Segment
+                    let deviceId = null;
+                    let attempts = 0;
+                    const maxAttempts = 5;
+                    
+                    while (!deviceId && attempts < maxAttempts) {
+                        if (segmentAnalytics.user) {
+                            try {
+                                deviceId = segmentAnalytics.user().anonymousId();
+                                if (deviceId) {
+                                    console.log('✅ Retrieved device ID from Segment user():', deviceId);
+                                    break;
+                                }
+                            } catch (e) {
+                                console.warn('Error getting device ID from Segment user():', e);
+                            }
+                        }
+                        
+                        if (!deviceId) {
+                            try {
+                                const segmentAnonId = localStorage.getItem('ajs_anonymous_id');
+                                if (segmentAnonId) {
+                                    deviceId = segmentAnonId.replace(/"/g, '');
+                                    console.log('✅ Retrieved device ID from Segment localStorage:', deviceId);
+                                    break;
+                                }
+                            } catch (e) {
+                                console.warn('Error accessing Segment localStorage:', e);
+                            }
+                        }
+                        
+                        if (!deviceId) {
+                            attempts++;
+                            console.warn(`⏳ Segment device ID not ready yet (attempt ${attempts}/${maxAttempts}), waiting...`);
+                            await new Promise(resolve => setTimeout(resolve, 500));
+                        }
+                    }
+                    
+                    if (!deviceId) {
+                        console.error('❌ Could not retrieve Segment device ID after multiple attempts!');
+                        console.error('❌ Skipping Session Replay initialization');
+                        return;
+                    }
+                    
+                    console.log('✅ Using Segment device ID for Session Replay:', deviceId);
+
+                    // Initialize Session Replay
+                    if (!window.sessionReplay) {
+                        console.warn('⚠️ Session Replay SDK not loaded yet, retrying...');
+                        await new Promise(resolve => setTimeout(resolve, 500));
+                    }
+
+                    if (!window.sessionReplay) {
+                        console.error('❌ Session Replay SDK failed to load');
+                        return;
+                    }
+
+                    sessionReplayInstance = window.sessionReplay;
+                    const initialSessionId = storedSessionId || Date.now();
+                    
+                    await sessionReplayInstance.init(AMPLITUDE_API_KEY, {
+                        sessionId: initialSessionId,
+                        deviceId: deviceId,
+                        sampleRate: 1,
+                        debugMode: true,
+                        optOut: false
+                    }).promise;
+
+                    console.log('✅ Session Replay initialized successfully!');
+                    console.log('   Device ID:', deviceId);
+                    console.log('   Session ID:', initialSessionId);
+
+                    // Sync session IDs
+                    segmentAnalytics.addSourceMiddleware(({ payload, next, integrations }) => {
+                        const storedSessionId = getStoredSessionId();
+                        setTimeout(() => {
+                            const nextSessionId = payload.obj?.integrations?.['Actions Amplitude']?.session_id || 0;
+                            if (storedSessionId < nextSessionId) {
+                                cookie.set("analytics_session_id", nextSessionId);
+                                sessionReplayInstance.setSessionId(nextSessionId);
+                                console.log('✅ Session ID updated to:', nextSessionId);
+                            }
+                        }, 0);
+                        next(payload);
+                    });
+
+                    // Initialize Amplitude Experiment SDK
+                    // Note: For this demo, Experiment SDK is optional
+                    // You can add experiment flags later for A/B testing guides & surveys
+                    if (typeof window.amplitude !== 'undefined' && window.amplitude.Experiment) {
+                        try {
+                            experimentClient = window.amplitude.Experiment.initializeWithAmplitudeAnalytics(
+                                EXPERIMENT_DEPLOYMENT_KEY,
+                                {
+                                    user: {
+                                        user_id: currentUser.userId,
+                                        device_id: deviceId
+                                    },
+                                    userProvider: {
+                                        getUser: () => ({
+                                            user_id: currentUser.userId,
+                                            device_id: deviceId,
+                                            user_properties: {
+                                                plan: currentUser.plan,
+                                                organization: currentUser.organization
+                                            }
+                                        })
+                                    }
+                                }
+                            );
+
+                            await experimentClient.fetch();
+                            console.log('✅ Amplitude Experiment initialized successfully!');
+                            
+                            // Get all variants
+                            const variants = experimentClient.all();
+                            console.log('📊 Active Experiment Variants:', variants);
+
+                        } catch (error) {
+                            console.error('❌ Error initializing Amplitude Experiment:', error);
+                        }
+                    } else {
+                        console.log('ℹ️ Amplitude Experiment SDK not loaded (optional for this demo)');
+                        console.log('   Experiment SDK is useful for A/B testing different guide/survey variations');
+                    }
+
+                    analyticsInitialized = true;
+
+                    // Track initial page view
+                    segmentAnalytics.page('Dashboard', {
+                        title: 'Snyk Dashboard',
+                        url: window.location.href,
+                        userId: currentUser.userId
+                    });
+
+                    // Track analytics initialized
+                    segmentAnalytics.track('Analytics Initialized', {
+                        source: 'segment',
+                        sessionReplayEnabled: true,
+                        experimentEnabled: true,
+                        deviceId: deviceId,
+                        sessionId: initialSessionId,
+                        userId: currentUser.userId
+                    });
+
+                    console.log('✅ All SDKs initialized successfully!');
+                    console.log('   - Segment Analytics ✓');
+                    console.log('   - Amplitude Session Replay ✓');
+                    console.log('   - Amplitude Experiment ✓');
+                    console.log('   - Amplitude Guides & Surveys will load after Engagement SDK is added');
+                });
+
+            } catch (error) {
+                console.error('Error initializing analytics:', error);
+            }
+        }
+
+        // Load Amplitude Engagement SDK for Guides & Surveys (after Segment is ready)
+        function loadEngagementSDK() {
+            const script = document.createElement('script');
+            script.src = 'https://cdn.amplitude.com/libs/engagement-browser-1.1.0-min.js.gz';
+            script.async = true;
+            script.onload = function() {
+                if (window.engagement) {
+                    console.log('✅ Amplitude Engagement SDK loaded');
+                    
+                    // Initialize Engagement SDK with Segment Analytics
+                    window.engagement.init(AMPLITUDE_API_KEY, {
+                        serverZone: 'US',
+                        logLevel: 2, // Warn
+                        // The Engagement SDK will automatically use Segment's device ID
+                        // since it's already initialized
+                        integrations: {
+                            segment: segmentAnalytics
+                        }
+                    });
+
+                    window.engagement.boot({
+                        userId: currentUser.userId,
+                        deviceId: segmentAnalytics.user().anonymousId()
+                    });
+
+                    console.log('✅ Amplitude Guides & Surveys initialized!');
+                }
+            };
+            document.body.appendChild(script);
+        }
+
+        // Cookie Consent Management
+        function showCookieBanner() {
+            const consent = cookie.get('cookie_consent');
+            if (!consent) {
+                document.getElementById('cookie-consent-banner').style.display = 'block';
+            } else if (consent === 'accepted') {
+                initializeAnalytics().then(() => {
+                    // Load Engagement SDK after other analytics are ready
+                    setTimeout(loadEngagementSDK, 2000);
+                });
+            }
+        }
+
+        document.getElementById('accept-cookies').addEventListener('click', function() {
+            cookie.set('cookie_consent', 'accepted', 365);
+            document.getElementById('cookie-consent-banner').style.display = 'none';
+            
+            initializeAnalytics().then(() => {
+                // Load Engagement SDK after other analytics are ready
+                setTimeout(loadEngagementSDK, 2000);
+            });
+
+            setTimeout(() => {
+                if (segmentAnalytics) {
+                    segmentAnalytics.track('Cookie Consent Given', {
+                        consent_type: 'accepted',
+                        timestamp: new Date().toISOString()
+                    });
+                }
+            }, 100);
+        });
+
+        document.getElementById('decline-cookies').addEventListener('click', function() {
+            cookie.set('cookie_consent', 'declined', 365);
+            document.getElementById('cookie-consent-banner').style.display = 'none';
+            console.log('Analytics disabled - user declined cookies');
+        });
+
+        showCookieBanner();
+
+        // Event Tracking Functions
+        function trackEvent(eventName, properties = {}) {
+            if (segmentAnalytics) {
+                segmentAnalytics.track(eventName, {
+                    ...properties,
+                    userId: currentUser.userId,
+                    organization: currentUser.organization
+                });
+                console.log('Event tracked:', eventName, properties);
+            } else {
+                console.warn('Segment not available - event not tracked:', eventName);
+            }
+        }
+
+        // Navigation Tracking
+        document.querySelectorAll('.sidebar-nav').forEach(link => {
+            link.addEventListener('click', function(e) {
+                e.preventDefault();
+                const targetPage = this.getAttribute('data-page');
+                const tabText = this.textContent.trim();
+                
+                // Track the action (click)
+                trackEvent('Side Menu Tab Clicked', {
+                    section_clicked: targetPage,
+                    tab_text: tabText
+                });
+
+                // Update active states
+                document.querySelectorAll('.sidebar-nav').forEach(l => l.classList.remove('active'));
+                this.classList.add('active');
+
+                // Show/hide pages
+                document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+                document.getElementById(targetPage + '-page').classList.add('active');
+
+                // Track page view (separate event)
+                segmentAnalytics.page(targetPage.charAt(0).toUpperCase() + targetPage.slice(1), {
+                    title: 'Snyk - ' + targetPage,
+                    url: window.location.href + '#' + targetPage
+                });
+            });
+        });
+
+        // Card Click Tracking
+        document.querySelectorAll('.card').forEach(card => {
+            card.addEventListener('click', function(e) {
+                if (!e.target.classList.contains('btn') && !e.target.closest('.btn')) {
+                    const cardTitle = this.querySelector('h3').textContent;
+                    trackEvent('Card Clicked', {
+                        card_title: cardTitle,
+                        page: document.querySelector('.sidebar-nav.active').getAttribute('data-page')
+                    });
+                }
+            });
+        });
+
+        // Widget Click Tracking (KEY for drop-off analysis)
+        document.querySelectorAll('.widget').forEach(widget => {
+            widget.addEventListener('click', function() {
+                const widgetType = this.getAttribute('data-widget');
+                const widgetTitle = this.querySelector('.widget-title').textContent;
+                
+                trackEvent('Widget Clicked', {
+                    widget_type: widgetType,
+                    widget_title: widgetTitle,
+                    page: 'overview'
+                });
+            });
+        });
+
+        // Card Action Button Tracking (KEY for drop-off analysis)
+        document.querySelectorAll('.card-action-btn').forEach(btn => {
+            btn.addEventListener('click', function(e) {
+                e.stopPropagation();
+                const cardType = this.getAttribute('data-card');
+                const action = this.getAttribute('data-action');
+                
+                trackEvent('Card Action Clicked', {
+                    card_type: cardType,
+                    action: action,
+                    button_text: this.textContent
+                });
+            });
+        });
+
+        // Project Click Tracking
+        document.querySelectorAll('.project-item').forEach(project => {
+            project.addEventListener('click', function() {
+                const projectName = this.getAttribute('data-project');
+                
+                trackEvent('Project Clicked', {
+                    project_name: projectName
+                });
+            });
+        });
+
+        // Button Click Tracking
+        document.getElementById('contact-sales-btn').addEventListener('click', function(e) {
+            e.preventDefault();
+            trackEvent('Contact Sales Clicked', {
+                location: 'header'
+            });
+        });
+
+        const addProjectBtn = document.getElementById('add-new-project-btn');
+        if (addProjectBtn) {
+            addProjectBtn.addEventListener('click', function() {
+                trackEvent('Add New Project Clicked', {
+                    page: 'projects'
+                });
+            });
+        }
+
+        const upgradeBtn = document.getElementById('upgrade-enterprise-btn');
+        if (upgradeBtn) {
+            upgradeBtn.addEventListener('click', function() {
+                trackEvent('Upgrade to Enterprise Clicked', {
+                    page: 'reports',
+                    current_plan: currentUser.plan
+                });
+            });
+        }
+
+        const cliDocsBtn = document.getElementById('view-cli-docs-btn');
+        if (cliDocsBtn) {
+            cliDocsBtn.addEventListener('click', function(e) {
+                e.preventDefault();
+                trackEvent('CLI Documentation Clicked', {
+                    card: 'monitor-local'
+                });
+            });
+        }
+
+        // Header Navigation Link Tracking
+        document.querySelectorAll('.nav-link').forEach(link => {
+            link.addEventListener('click', function(e) {
+                e.preventDefault();
+                const linkName = this.getAttribute('data-link');
+                trackEvent('Header Navigation Clicked', {
+                    link_name: linkName
+                });
+            });
+        });
+
+        // User Avatar Click Tracking
+        document.getElementById('user-avatar').addEventListener('click', function() {
+            trackEvent('User Avatar Clicked', {
+                user_id: currentUser.userId
+            });
+        });
+
+        // Scroll Depth Tracking
+        let maxScroll = 0;
+        const scrollMilestones = [25, 50, 75, 100];
+        const trackedMilestones = new Set();
+
+        window.addEventListener('scroll', function() {
+            const scrollPercentage = Math.round((window.scrollY / (document.documentElement.scrollHeight - window.innerHeight)) * 100);
+            
+            if (scrollPercentage > maxScroll) {
+                maxScroll = scrollPercentage;
+                
+                scrollMilestones.forEach(milestone => {
+                    if (scrollPercentage >= milestone && !trackedMilestones.has(milestone)) {
+                        trackedMilestones.add(milestone);
+                        trackEvent('Scroll Depth Reached', {
+                            percentage: milestone,
+                            page: document.querySelector('.sidebar-nav.active').getAttribute('data-page')
+                        });
+                    }
+                });
+            }
+        });
+    </script>
+</body>
+</html>
+
