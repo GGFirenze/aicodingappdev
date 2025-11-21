@@ -101,6 +101,129 @@
             border-color: #888;
         }
 
+        /* Login Overlay */
+        #login-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0, 0, 0, 0.85);
+            backdrop-filter: blur(8px);
+            z-index: 10001;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .login-modal {
+            background: white;
+            border-radius: 16px;
+            padding: 48px;
+            max-width: 480px;
+            width: 90%;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+        }
+
+        .login-header {
+            text-align: center;
+            margin-bottom: 32px;
+        }
+
+        .login-header h2 {
+            font-size: 28px;
+            margin-bottom: 12px;
+            color: #1a1a1a;
+        }
+
+        .login-header p {
+            font-size: 15px;
+            color: #666;
+        }
+
+        .login-form {
+            margin-bottom: 24px;
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        .form-group label {
+            display: block;
+            font-size: 14px;
+            font-weight: 600;
+            color: #1a1a1a;
+            margin-bottom: 8px;
+        }
+
+        .form-group input {
+            width: 100%;
+            padding: 12px 16px;
+            border: 1.5px solid #d4d4d4;
+            border-radius: 8px;
+            font-size: 15px;
+            transition: all 0.2s;
+        }
+
+        .form-group input:focus {
+            outline: none;
+            border-color: #5b47d6;
+            box-shadow: 0 0 0 3px rgba(91, 71, 214, 0.1);
+        }
+
+        .password-wrapper {
+            position: relative;
+        }
+
+        .password-toggle {
+            position: absolute;
+            right: 12px;
+            top: 50%;
+            transform: translateY(-50%);
+            background: none;
+            border: none;
+            color: #666;
+            cursor: pointer;
+            font-size: 12px;
+            padding: 4px 8px;
+        }
+
+        .password-toggle:hover {
+            color: #5b47d6;
+        }
+
+        .login-btn {
+            width: 100%;
+            padding: 14px;
+            background: #5b47d6;
+            color: white;
+            border: none;
+            border-radius: 8px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .login-btn:hover {
+            background: #4a38c2;
+            transform: translateY(-1px);
+        }
+
+        .login-btn:disabled {
+            background: #d4d4d4;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        .login-footer {
+            text-align: center;
+            font-size: 14px;
+            color: #666;
+            margin-top: 24px;
+        }
+
         /* Header */
         header {
             background: white;
@@ -614,6 +737,45 @@
     </style>
 </head>
 <body>
+    <!-- Login Overlay -->
+    <div id="login-overlay">
+        <div class="login-modal">
+            <div class="login-header">
+                <h2>🔒 Welcome to Snyk</h2>
+                <p>Sign in to secure your code</p>
+            </div>
+            <form class="login-form" id="login-form">
+                <div class="form-group">
+                    <label for="login-email">Email Address</label>
+                    <input 
+                        type="email" 
+                        id="login-email" 
+                        placeholder="your.email@example.com" 
+                        required
+                        autocomplete="email"
+                    >
+                </div>
+                <div class="form-group">
+                    <label for="login-password">Password</label>
+                    <div class="password-wrapper">
+                        <input 
+                            type="password" 
+                            id="login-password" 
+                            placeholder="Enter your password" 
+                            required
+                            autocomplete="current-password"
+                        >
+                        <button type="button" class="password-toggle" id="password-toggle">Show</button>
+                    </div>
+                </div>
+                <button type="submit" class="login-btn" id="login-btn">Sign In</button>
+            </form>
+            <div class="login-footer">
+                Demo app - Any email and password will work
+            </div>
+        </div>
+    </div>
+
     <!-- Cookie Consent Banner -->
     <div id="cookie-consent-banner" style="display: none;">
         <div class="cookie-content">
@@ -1050,14 +1212,89 @@
         let sessionReplayInstance = null;
         let experimentClient = null;
 
-        // User identification (GitHub login already completed)
-        const currentUser = {
-            userId: 'giuliano_giannini',
-            email: 'giuliano.giannini@amplitude.com',
-            name: 'Giuliano Giannini',
+        // User identification (will be set after login)
+        let currentUser = {
+            userId: null,
+            email: null,
+            name: null,
             organization: 'ggfrenze',
-            plan: 'free' // For cohort targeting
+            plan: 'free'
         };
+
+        // Hash email for privacy (SHA-256, first 16 chars)
+        async function hashEmail(email) {
+            const encoder = new TextEncoder();
+            const data = encoder.encode(email.toLowerCase());
+            const hashBuffer = await crypto.subtle.digest('SHA-256', data);
+            const hashArray = Array.from(new Uint8Array(hashBuffer));
+            const hashHex = hashArray.map(b => b.toString(16).padStart(2, '0')).join('');
+            return hashHex.substring(0, 16);
+        }
+
+        // Extract name from email
+        function getNameFromEmail(email) {
+            const username = email.split('@')[0];
+            const parts = username.split(/[._-]/);
+            const firstName = parts[0].charAt(0).toUpperCase() + parts[0].slice(1);
+            const lastName = parts.length > 1 ? parts[1].charAt(0).toUpperCase() + parts[1].slice(1) : '';
+            return {
+                firstName: firstName,
+                lastName: lastName,
+                fullName: lastName ? `${firstName} ${lastName}` : firstName,
+                initials: firstName.charAt(0) + (lastName ? lastName.charAt(0) : firstName.charAt(1) || '').toUpperCase()
+            };
+        }
+
+        // Handle login
+        document.addEventListener('DOMContentLoaded', function() {
+            const loginForm = document.getElementById('login-form');
+            const loginOverlay = document.getElementById('login-overlay');
+            const passwordToggle = document.getElementById('password-toggle');
+            const passwordInput = document.getElementById('login-password');
+            const userAvatar = document.getElementById('user-avatar');
+
+            // Password visibility toggle
+            passwordToggle.addEventListener('click', function() {
+                if (passwordInput.type === 'password') {
+                    passwordInput.type = 'text';
+                    passwordToggle.textContent = 'Hide';
+                } else {
+                    passwordInput.type = 'password';
+                    passwordToggle.textContent = 'Show';
+                }
+            });
+
+            // Handle login form submission
+            loginForm.addEventListener('submit', async function(e) {
+                e.preventDefault();
+                
+                const email = document.getElementById('login-email').value;
+                const password = document.getElementById('login-password').value;
+
+                if (!email || !password) return;
+
+                // Hash email for user ID
+                const hashedUserId = await hashEmail(email);
+                const nameInfo = getNameFromEmail(email);
+
+                // Set current user
+                currentUser.userId = hashedUserId;
+                currentUser.email = email;
+                currentUser.name = nameInfo.fullName;
+
+                // Update UI
+                userAvatar.textContent = nameInfo.initials;
+                userAvatar.title = nameInfo.fullName;
+
+                // Hide login overlay
+                loginOverlay.style.display = 'none';
+
+                // Initialize analytics after login
+                if (!analyticsInitialized && cookie.get('cookie_consent') === 'accepted') {
+                    await initializeAnalytics();
+                }
+            });
+        });
 
         // Initialize analytics (only after consent)
         async function initializeAnalytics() {
