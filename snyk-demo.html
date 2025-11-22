@@ -1289,9 +1289,12 @@
                 // Hide login overlay
                 loginOverlay.style.display = 'none';
 
-                // Initialize analytics after login
-                if (!analyticsInitialized && cookie.get('cookie_consent') === 'accepted') {
+                // Initialize analytics after login (this will include proper user info)
+                if (cookie.get('cookie_consent') === 'accepted') {
                     await initializeAnalytics();
+                } else {
+                    // Show cookie banner if not consented yet
+                    showCookieBanner();
                 }
             });
         });
@@ -1411,75 +1414,102 @@
                         next(payload);
                     });
 
-                    // Initialize Amplitude Guides & Surveys (Engagement SDK)
-                    // Use the script loader with embedded API key
-                    console.log('🎯 Loading Amplitude Guides & Surveys SDK...');
+                    // Initialize Amplitude Guides & Surveys using script loader (only viable option for single HTML file)
+                    console.log('🎯 Loading Amplitude Guides & Surveys SDK via script loader...');
                     
-                    const loadEngagementScript = () => {
-                        return new Promise((resolve, reject) => {
+                    // Load the script loader (embeds API key, auto-loads SDK)
+                    const loadEngagementViaScriptLoader = () => {
+                        return new Promise((resolve) => {
                             const script = document.createElement('script');
-                            // Use the Amplitude script loader with API key embedded
                             script.src = `https://cdn.amplitude.com/script/${AMPLITUDE_API_KEY}.engagement.js`;
                             script.async = false;
                             script.onload = () => {
-                                console.log('✅ Engagement SDK script loaded');
+                                console.log('✅ Engagement SDK script loader loaded');
                                 resolve();
                             };
                             script.onerror = () => {
-                                console.error('❌ Failed to load Engagement SDK script');
-                                reject(new Error('Engagement SDK failed to load'));
+                                console.error('❌ Script loader failed - Guides & Surveys may not be enabled in project');
+                                resolve(); // Don't reject, continue anyway
                             };
                             document.head.appendChild(script);
                         });
                     };
                     
-                    try {
-                        await loadEngagementScript();
+                    await loadEngagementViaScriptLoader();
+                    
+                    // Wait for SDK to initialize
+                    await new Promise(resolve => setTimeout(resolve, 1000));
+                    
+                    if (window.engagement) {
+                        console.log('🎯 Configuring Guides & Surveys for Segment integration...');
                         
-                        // Wait for the SDK to be available on window
-                        let engagementReady = false;
-                        for (let i = 0; i < 10; i++) {
-                            if (window.engagement) {
-                                engagementReady = true;
-                                break;
-                            }
-                            await new Promise(resolve => setTimeout(resolve, 300));
-                        }
-                        
-                        if (engagementReady && window.engagement) {
-                            console.log('🎯 Initializing Amplitude Guides & Surveys...');
+                        try {
+                            // Get user ID and device ID safely from Segment
+                            let userId = currentUser.userId;
+                            let userDeviceId = deviceId; // Use outer scope's deviceId
                             
-                            // When using script loader, call boot with proper user object
-                            window.engagement.boot({
+                            // Try to get from Segment if available
+                            if (typeof segmentAnalytics.user === 'function') {
+                                const segmentUser = segmentAnalytics.user();
+                                userId = segmentUser.id() || currentUser.userId;
+                                userDeviceId = segmentUser.anonymousId() || deviceId;
+                            }
+                            
+                            console.log('👤 Booting with:', { userId, deviceId: userDeviceId });
+                            
+                            // Boot with identity
+                            await window.engagement.boot({
                                 user: {
-                                    user_id: currentUser.userId,
-                                    device_id: deviceId
+                                    user_id: userId,
+                                    device_id: userDeviceId
                                 },
-                                userProperties: {
+                                user_properties: {
                                     email: currentUser.email,
                                     name: currentUser.name,
                                     organization: currentUser.organization,
                                     plan: currentUser.plan
                                 },
-                                integrations: {
-                                    segment: segmentAnalytics
-                                }
+                                integrations: [{
+                                    track: (event) => {
+                                        segmentAnalytics.track(event.event_type, event.event_properties);
+                                    }
+                                }]
+                            });
+
+                            // Forward Segment events to G&S
+                            segmentAnalytics.on('track', (event, properties) => {
+                                window.engagement?.forwardEvent?.({
+                                    event_type: event,
+                                    event_properties: properties
+                                });
+                            });
+
+                            segmentAnalytics.on('page', (name, properties) => {
+                                window.engagement?.forwardEvent?.({
+                                    event_type: 'Page Viewed',
+                                    event_properties: { name, ...properties }
+                                });
                             });
 
                             console.log('✅ Amplitude Guides & Surveys initialized!');
-                            console.log('   - SDK auto-initialized via script loader');
-                            console.log('   - Booted with user:', currentUser.userId);
-                            console.log('   - Device ID:', deviceId);
-                            console.log('   - Integrated with Segment analytics');
-                        } else {
-                            console.warn('⚠️ Engagement SDK not available after loading');
-                            console.warn('   This may mean Guides & Surveys is not enabled in your Amplitude project');
-                            console.warn('   Enable it at: Settings > Projects > (Your Project) > Guides & Surveys');
+                            console.log('   - User ID:', userId);
+                            console.log('   - Device ID:', userDeviceId);
+                            console.log('   - Segment event forwarding enabled');
+                            
+                            // Debug check
+                            setTimeout(() => {
+                                const status = window.engagement._debugStatus?.();
+                                if (status) {
+                                    console.log('📊 G&S Status:', status);
+                                }
+                            }, 1000);
+                        } catch (error) {
+                            console.error('❌ Error booting Guides & Surveys:', error);
                         }
-                    } catch (error) {
-                        console.warn('⚠️ Could not load Engagement SDK:', error.message);
-                        console.warn('   Guides & Surveys may not be enabled in your Amplitude project');
-                        console.warn('   Or check your network/CORS settings');
+                    } else {
+                        console.warn('⚠️ Guides & Surveys SDK not available');
+                        console.warn('   This likely means G&S is not enabled in your Amplitude project');
+                        console.warn('   Contact your Amplitude admin to enable it');
                     }
 
                     // Initialize Amplitude Experiment SDK
@@ -1550,7 +1580,8 @@
             const consent = cookie.get('cookie_consent');
             if (!consent) {
                 document.getElementById('cookie-consent-banner').style.display = 'block';
-            } else if (consent === 'accepted') {
+            } else if (consent === 'accepted' && currentUser.userId) {
+                // Only initialize if we have a logged-in user
                 initializeAnalytics();
             }
         }
@@ -1568,7 +1599,8 @@
             console.log('Analytics disabled - user declined cookies');
         });
 
-        showCookieBanner();
+        // Don't auto-show banner on load - wait for login first
+        // showCookieBanner() will be called after login or on page load if already logged in
 
         // Event Tracking Functions
         function trackEvent(eventName, properties = {}) {
