@@ -337,6 +337,204 @@
             background: #fafafa;
             border-right: 1px solid #e5e5e5;
             padding: 24px 0;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+        }
+
+        .sidebar-top {
+            flex: 1;
+        }
+
+        .sidebar-footer {
+            border-top: 1px solid #e5e5e5;
+            padding: 16px 20px 0;
+        }
+
+        .sidebar-footer-item {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            padding: 10px 12px;
+            border-radius: 6px;
+            color: #666;
+            text-decoration: none;
+            font-size: 14px;
+            cursor: pointer;
+            transition: all 0.2s;
+            margin-bottom: 4px;
+            position: relative;
+        }
+
+        .sidebar-footer-item:hover {
+            background: #f0f0f0;
+            color: #1a1a1a;
+        }
+
+        .sidebar-footer-item .icon {
+            font-size: 16px;
+        }
+
+        .notification-badge {
+            position: absolute;
+            top: 8px;
+            left: 20px;
+            background: #ff5d5d;
+            color: white;
+            font-size: 10px;
+            font-weight: 700;
+            padding: 2px 5px;
+            border-radius: 10px;
+            min-width: 16px;
+            text-align: center;
+        }
+
+        .dropdown-arrow {
+            margin-left: auto;
+            font-size: 10px;
+            opacity: 0.6;
+        }
+
+        /* Help Dropdown Menu */
+        .help-dropdown {
+            position: fixed;
+            bottom: 80px;
+            left: 20px;
+            width: 200px;
+            background: white;
+            border: 1px solid #e5e5e5;
+            border-radius: 8px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+            padding: 8px 0;
+            display: none;
+            z-index: 1001;
+        }
+
+        .help-dropdown.active {
+            display: block;
+        }
+
+        .help-dropdown-header {
+            padding: 8px 16px;
+            font-size: 11px;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            color: #999;
+        }
+
+        .help-dropdown-item {
+            padding: 10px 16px;
+            font-size: 14px;
+            color: #1a1a1a;
+            text-decoration: none;
+            display: block;
+            transition: background 0.2s;
+            cursor: pointer;
+        }
+
+        .help-dropdown-item:hover {
+            background: #f5f5f5;
+        }
+
+        .help-dropdown-divider {
+            height: 1px;
+            background: #e5e5e5;
+            margin: 8px 0;
+        }
+
+        /* User Dropdown Menu */
+        .user-dropdown {
+            position: fixed;
+            bottom: 40px;
+            left: 20px;
+            width: 240px;
+            background: white;
+            border: 1px solid #e5e5e5;
+            border-radius: 8px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+            padding: 0;
+            display: none;
+            z-index: 1001;
+        }
+
+        .user-dropdown.active {
+            display: block;
+        }
+
+        .user-dropdown-header {
+            padding: 16px;
+            border-bottom: 1px solid #e5e5e5;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .user-dropdown-avatar {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            background: #5b47d6;
+            color: white;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 600;
+            font-size: 16px;
+            flex-shrink: 0;
+        }
+
+        .user-dropdown-info {
+            flex: 1;
+            min-width: 0;
+        }
+
+        .user-dropdown-name {
+            font-size: 14px;
+            font-weight: 600;
+            color: #1a1a1a;
+            margin-bottom: 2px;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        .user-dropdown-email {
+            font-size: 12px;
+            color: #666;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        .user-dropdown-menu {
+            padding: 8px 0;
+        }
+
+        .user-dropdown-item {
+            padding: 10px 16px;
+            font-size: 14px;
+            color: #1a1a1a;
+            text-decoration: none;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            transition: background 0.2s;
+            cursor: pointer;
+        }
+
+        .user-dropdown-item:hover {
+            background: #f5f5f5;
+        }
+
+        .user-dropdown-item .icon {
+            font-size: 14px;
+            width: 16px;
+            text-align: center;
+        }
+
+        .user-dropdown-item.logout {
+            color: #c00;
         }
 
         .sidebar-section {
@@ -811,24 +1009,86 @@
     <div class="dashboard-layout">
         <!-- Sidebar -->
         <aside class="sidebar">
-            <div class="sidebar-section">
-                <div class="sidebar-label">Organization</div>
-                <div class="sidebar-org">
-                    <div class="org-icon">G</div>
-                    <div class="org-name">ggfrenze</div>
+            <div class="sidebar-top">
+                <div class="sidebar-section">
+                    <div class="sidebar-label">Organization</div>
+                    <div class="sidebar-org">
+                        <div class="org-icon">G</div>
+                        <div class="org-name">ggfrenze</div>
+                    </div>
+                </div>
+                
+                <div class="sidebar-section">
+                    <ul class="sidebar-menu">
+                        <li><a href="#" class="sidebar-nav active" data-page="overview">📊 Dashboard</a></li>
+                        <li><a href="#" class="sidebar-nav" data-page="projects">📁 Projects</a></li>
+                        <li><a href="#" class="sidebar-nav" data-page="reports">📈 Reports</a></li>
+                        <li><a href="#" class="sidebar-nav" data-page="integrations">🔌 Integrations</a></li>
+                        <li><a href="#" class="sidebar-nav" data-page="settings">⚙️ Settings</a></li>
+                    </ul>
                 </div>
             </div>
-            
-            <div class="sidebar-section">
-                <ul class="sidebar-menu">
-                    <li><a href="#" class="sidebar-nav active" data-page="overview">📊 Dashboard</a></li>
-                    <li><a href="#" class="sidebar-nav" data-page="projects">📁 Projects</a></li>
-                    <li><a href="#" class="sidebar-nav" data-page="reports">📈 Reports</a></li>
-                    <li><a href="#" class="sidebar-nav" data-page="integrations">🔌 Integrations</a></li>
-                    <li><a href="#" class="sidebar-nav" data-page="settings">⚙️ Settings</a></li>
-                </ul>
+
+            <div class="sidebar-footer">
+                <a href="https://updates.snyk.io/" target="_blank" rel="noopener noreferrer" class="sidebar-footer-item" id="product-updates">
+                    <span class="icon">🔔</span>
+                    <span>Product updates</span>
+                    <span class="notification-badge">2</span>
+                </a>
+                <div class="sidebar-footer-item" id="help-menu">
+                    <span class="icon">❓</span>
+                    <span>Help</span>
+                    <span class="dropdown-arrow">▾</span>
+                </div>
+                <div class="sidebar-footer-item" id="user-menu">
+                    <span class="icon">👤</span>
+                    <span id="user-name-sidebar">Giuliano Giannini</span>
+                    <span class="dropdown-arrow">▾</span>
+                </div>
             </div>
         </aside>
+
+        <!-- Help Dropdown Menu -->
+        <div class="help-dropdown" id="help-dropdown-menu">
+            <div class="help-dropdown-header">HELP</div>
+            <a href="https://learn.snyk.io/user/learning-progress" target="_blank" rel="noopener noreferrer" class="help-dropdown-item" data-help-item="snyk-learn">Snyk Learn</a>
+            <a href="https://docs.snyk.io/" target="_blank" rel="noopener noreferrer" class="help-dropdown-item" data-help-item="documentation">Documentation</a>
+            <a href="https://learn.snyk.io/catalog/product-training/" target="_blank" rel="noopener noreferrer" class="help-dropdown-item" data-help-item="product-training">Product training</a>
+            <div class="help-dropdown-divider"></div>
+            <a href="https://support.snyk.io/s/" target="_blank" rel="noopener noreferrer" class="help-dropdown-item" data-help-item="support-community">Snyk Support Community</a>
+            <a href="https://security.snyk.io/" target="_blank" rel="noopener noreferrer" class="help-dropdown-item" data-help-item="vulnerability-db">Snyk Vulnerability DB</a>
+            <div class="help-dropdown-divider"></div>
+            <a href="https://snyk.statuspage.io/" target="_blank" rel="noopener noreferrer" class="help-dropdown-item" data-help-item="status-report">Snyk status report</a>
+        </div>
+
+        <!-- User Dropdown Menu -->
+        <div class="user-dropdown" id="user-dropdown-menu">
+            <div class="user-dropdown-header">
+                <div class="user-dropdown-avatar" id="user-dropdown-avatar">GG</div>
+                <div class="user-dropdown-info">
+                    <div class="user-dropdown-name" id="user-dropdown-name">Giuliano Giannini</div>
+                    <div class="user-dropdown-email" id="user-dropdown-email">giuliano.giannini@yahoo.com</div>
+                </div>
+            </div>
+            <div class="user-dropdown-menu">
+                <a href="#" class="user-dropdown-item" id="account-settings" data-user-action="account-settings">
+                    <span class="icon">⚙️</span>
+                    <span>Account settings</span>
+                </a>
+                <a href="#" class="user-dropdown-item" id="notification-preferences" data-user-action="notification-preferences">
+                    <span class="icon">🔔</span>
+                    <span>Notification preferences</span>
+                </a>
+                <a href="#" class="user-dropdown-item" id="share-with-friend" data-user-action="share-with-friend">
+                    <span class="icon">↗️</span>
+                    <span>Share with a friend</span>
+                </a>
+                <a href="#" class="user-dropdown-item logout" id="log-out" data-user-action="log-out">
+                    <span class="icon">🚪</span>
+                    <span>Log out</span>
+                </a>
+            </div>
+        </div>
 
         <!-- Main Content -->
         <main class="main-content">
@@ -1285,6 +1545,21 @@
                 // Update UI
                 userAvatar.textContent = nameInfo.initials;
                 userAvatar.title = nameInfo.fullName;
+                
+                // Update sidebar user name
+                const sidebarUserName = document.getElementById('user-name-sidebar');
+                if (sidebarUserName) {
+                    sidebarUserName.textContent = nameInfo.fullName;
+                }
+
+                // Update user dropdown info
+                const dropdownAvatar = document.getElementById('user-dropdown-avatar');
+                const dropdownName = document.getElementById('user-dropdown-name');
+                const dropdownEmail = document.getElementById('user-dropdown-email');
+                
+                if (dropdownAvatar) dropdownAvatar.textContent = nameInfo.initials;
+                if (dropdownName) dropdownName.textContent = nameInfo.fullName;
+                if (dropdownEmail) dropdownEmail.textContent = email;
 
                 // Hide login overlay
                 loginOverlay.style.display = 'none';
@@ -1752,6 +2027,109 @@
             trackEvent('User Avatar Clicked', {
                 user_id: currentUser.userId
             });
+        });
+
+        // Sidebar Footer Item Tracking
+        const productUpdates = document.getElementById('product-updates');
+        if (productUpdates) {
+            productUpdates.addEventListener('click', function() {
+                trackEvent('Product Updates Clicked', {
+                    location: 'sidebar_footer',
+                    destination_url: 'https://updates.snyk.io/',
+                    link_type: 'external'
+                });
+            });
+        }
+
+        const helpMenu = document.getElementById('help-menu');
+        if (helpMenu) {
+            helpMenu.addEventListener('click', function(e) {
+                e.stopPropagation();
+                const dropdown = document.getElementById('help-dropdown-menu');
+                const isOpen = dropdown.classList.contains('active');
+                
+                if (isOpen) {
+                    dropdown.classList.remove('active');
+                } else {
+                    dropdown.classList.add('active');
+                    trackEvent('Help Menu Clicked', {
+                        location: 'sidebar_footer',
+                        action: 'opened'
+                    });
+                }
+            });
+        }
+
+        // Help dropdown item tracking
+        document.querySelectorAll('.help-dropdown-item').forEach(item => {
+            item.addEventListener('click', function() {
+                const helpItem = this.getAttribute('data-help-item');
+                trackEvent('Help Item Clicked', {
+                    help_item: helpItem,
+                    destination_url: this.href,
+                    link_type: 'external'
+                });
+            });
+        });
+
+        // Close help dropdown when clicking outside
+        document.addEventListener('click', function(e) {
+            const dropdown = document.getElementById('help-dropdown-menu');
+            const helpButton = document.getElementById('help-menu');
+            if (dropdown && helpButton && !dropdown.contains(e.target) && !helpButton.contains(e.target)) {
+                dropdown.classList.remove('active');
+            }
+        });
+
+        const userMenu = document.getElementById('user-menu');
+        if (userMenu) {
+            userMenu.addEventListener('click', function(e) {
+                e.stopPropagation();
+                const dropdown = document.getElementById('user-dropdown-menu');
+                const isOpen = dropdown.classList.contains('active');
+                
+                // Close help dropdown if open
+                document.getElementById('help-dropdown-menu').classList.remove('active');
+                
+                if (isOpen) {
+                    dropdown.classList.remove('active');
+                } else {
+                    dropdown.classList.add('active');
+                    trackEvent('User Menu Clicked', {
+                        location: 'sidebar_footer',
+                        user_id: currentUser.userId,
+                        action: 'opened'
+                    });
+                }
+            });
+        }
+
+        // User dropdown item tracking
+        document.querySelectorAll('.user-dropdown-item').forEach(item => {
+            item.addEventListener('click', function(e) {
+                const action = this.getAttribute('data-user-action');
+                
+                trackEvent('User Menu Item Clicked', {
+                    menu_item: action,
+                    user_id: currentUser.userId
+                });
+
+                // Handle logout
+                if (action === 'log-out') {
+                    e.preventDefault();
+                    // Reload page to show login screen again
+                    location.reload();
+                }
+            });
+        });
+
+        // Close user dropdown when clicking outside
+        document.addEventListener('click', function(e) {
+            const dropdown = document.getElementById('user-dropdown-menu');
+            const userButton = document.getElementById('user-menu');
+            if (dropdown && userButton && !dropdown.contains(e.target) && !userButton.contains(e.target)) {
+                dropdown.classList.remove('active');
+            }
         });
     </script>
 </body>
