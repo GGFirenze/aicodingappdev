@@ -1321,19 +1321,19 @@
                         <div class="card">
                             <h3>📊 Vulnerability Trends</h3>
                             <p>Track how vulnerabilities change over time across your organization.</p>
-                            <button class="btn btn-secondary">View Report</button>
+                            <button class="btn btn-secondary view-report-btn" data-report-type="vulnerability-trends" data-report-title="Vulnerability Trends">View Report</button>
                         </div>
 
                         <div class="card">
                             <h3>🎯 Security Posture</h3>
                             <p>Understand your overall security posture and areas for improvement.</p>
-                            <button class="btn btn-secondary">View Report</button>
+                            <button class="btn btn-secondary view-report-btn" data-report-type="security-posture" data-report-title="Security Posture">View Report</button>
                         </div>
 
                         <div class="card">
                             <h3>📈 Remediation Progress</h3>
                             <p>Monitor how quickly your team addresses security issues.</p>
-                            <button class="btn btn-secondary">View Report</button>
+                            <button class="btn btn-secondary view-report-btn" data-report-type="remediation-progress" data-report-title="Remediation Progress">View Report</button>
                         </div>
                     </div>
                 </div>
@@ -1357,37 +1357,37 @@
                         <div class="card">
                             <h3>🐙 GitHub</h3>
                             <p>Automatically test and monitor your GitHub repositories.</p>
-                            <button class="btn btn-primary">Connect GitHub</button>
+                            <button class="btn btn-primary connect-integration-btn" data-integration-type="github" data-integration-name="GitHub">Connect GitHub</button>
                         </div>
 
                         <div class="card">
                             <h3>🦊 GitLab</h3>
                             <p>Integrate Snyk security scanning into your GitLab workflow.</p>
-                            <button class="btn btn-primary">Connect GitLab</button>
+                            <button class="btn btn-primary connect-integration-btn" data-integration-type="gitlab" data-integration-name="GitLab">Connect GitLab</button>
                         </div>
 
                         <div class="card">
                             <h3>☁️ AWS</h3>
                             <p>Monitor your AWS cloud infrastructure for security issues.</p>
-                            <button class="btn btn-primary">Connect AWS</button>
+                            <button class="btn btn-primary connect-integration-btn" data-integration-type="aws" data-integration-name="AWS">Connect AWS</button>
                         </div>
 
                         <div class="card">
                             <h3>📦 npm</h3>
                             <p>Scan your npm packages for known vulnerabilities.</p>
-                            <button class="btn btn-primary">Connect npm</button>
+                            <button class="btn btn-primary connect-integration-btn" data-integration-type="npm" data-integration-name="npm">Connect npm</button>
                         </div>
 
                         <div class="card">
                             <h3>🐋 Docker Hub</h3>
                             <p>Secure your container images with automated scanning.</p>
-                            <button class="btn btn-primary">Connect Docker Hub</button>
+                            <button class="btn btn-primary connect-integration-btn" data-integration-type="docker-hub" data-integration-name="Docker Hub">Connect Docker Hub</button>
                         </div>
 
                         <div class="card">
                             <h3>☸️ Kubernetes</h3>
                             <p>Monitor your Kubernetes workloads for security risks.</p>
-                            <button class="btn btn-primary">Connect Kubernetes</button>
+                            <button class="btn btn-primary connect-integration-btn" data-integration-type="kubernetes" data-integration-name="Kubernetes">Connect Kubernetes</button>
                         </div>
                     </div>
                 </div>
@@ -1472,6 +1472,9 @@
         let sessionReplayInstance = null;
         let experimentClient = null;
 
+        // Store pending events (before consent is given)
+        let pendingLoginEvent = null;
+
         // User identification (will be set after login)
         let currentUser = {
             userId: null,
@@ -1505,8 +1508,69 @@
             };
         }
 
+        // Check if user is already logged in (from localStorage)
+        function checkExistingLogin() {
+            const storedAuth = localStorage.getItem('snyk_auth_state');
+            if (storedAuth) {
+                try {
+                    const authData = JSON.parse(storedAuth);
+                    if (authData.userId && authData.email) {
+                        console.log('✅ Found existing login session:', authData.email);
+                        
+                        // Restore user session
+                        currentUser.userId = authData.userId;
+                        currentUser.email = authData.email;
+                        currentUser.name = authData.name;
+                        currentUser.organization = authData.organization || 'ggfrenze';
+                        currentUser.plan = authData.plan || 'free';
+                        
+                        // Update UI
+                        const userAvatar = document.getElementById('user-avatar');
+                        const sidebarUserName = document.getElementById('user-name-sidebar');
+                        const dropdownAvatar = document.getElementById('user-dropdown-avatar');
+                        const dropdownName = document.getElementById('user-dropdown-name');
+                        const dropdownEmail = document.getElementById('user-dropdown-email');
+                        
+                        if (userAvatar) {
+                            userAvatar.textContent = authData.initials;
+                            userAvatar.title = authData.name;
+                        }
+                        if (sidebarUserName) sidebarUserName.textContent = authData.name;
+                        if (dropdownAvatar) dropdownAvatar.textContent = authData.initials;
+                        if (dropdownName) dropdownName.textContent = authData.name;
+                        if (dropdownEmail) dropdownEmail.textContent = authData.email;
+                        
+                        // Hide login overlay
+                        const loginOverlay = document.getElementById('login-overlay');
+                        if (loginOverlay) loginOverlay.style.display = 'none';
+                        
+                        // Initialize analytics if consent already given (check localStorage first, fallback to cookie)
+                        const consent = localStorage.getItem('cookie_consent') || cookie.get('cookie_consent');
+                        if (consent === 'accepted') {
+                            initializeAnalytics();
+                        } else {
+                            showCookieBanner();
+                        }
+                        
+                        return true;
+                    }
+                } catch (e) {
+                    console.warn('Error parsing stored auth:', e);
+                    localStorage.removeItem('snyk_auth_state');
+                }
+            }
+            return false;
+        }
+
         // Handle login
         document.addEventListener('DOMContentLoaded', function() {
+            // Check for existing login first
+            const isLoggedIn = checkExistingLogin();
+            if (isLoggedIn) {
+                console.log('✅ User already logged in, skipping login screen');
+                return; // Skip login form setup if already logged in
+            }
+            
             const loginForm = document.getElementById('login-form');
             const loginOverlay = document.getElementById('login-overlay');
             const passwordToggle = document.getElementById('password-toggle');
@@ -1542,6 +1606,33 @@
                 currentUser.email = email;
                 currentUser.name = nameInfo.fullName;
 
+                // Store login state in localStorage (persist across page loads/tabs)
+                const authState = {
+                    userId: hashedUserId,
+                    email: email,
+                    name: nameInfo.fullName,
+                    initials: nameInfo.initials,
+                    organization: currentUser.organization,
+                    plan: currentUser.plan,
+                    loginTime: new Date().toISOString()
+                };
+                localStorage.setItem('snyk_auth_state', JSON.stringify(authState));
+                console.log('💾 Login state saved to localStorage');
+
+                // Store login event for retroactive tracking (after consent)
+                pendingLoginEvent = {
+                    eventName: 'Login Completed',
+                    properties: {
+                        email: email,
+                        user_id: hashedUserId,
+                        name: nameInfo.fullName,
+                        organization: currentUser.organization,
+                        plan: currentUser.plan,
+                        login_timestamp: new Date().toISOString()
+                    }
+                };
+                console.log('📝 Login event stored (will track after consent)');
+
                 // Update UI
                 userAvatar.textContent = nameInfo.initials;
                 userAvatar.title = nameInfo.fullName;
@@ -1565,7 +1656,9 @@
                 loginOverlay.style.display = 'none';
 
                 // Initialize analytics after login (this will include proper user info)
-                if (cookie.get('cookie_consent') === 'accepted') {
+                // Check localStorage first, fallback to cookie for consent
+                const consent = localStorage.getItem('cookie_consent') || cookie.get('cookie_consent');
+                if (consent === 'accepted') {
                     await initializeAnalytics();
                 } else {
                     // Show cookie banner if not consented yet
@@ -1600,6 +1693,17 @@
                 // Wait for Segment to be fully loaded
                 segmentAnalytics.ready(async function() {
                     await new Promise(resolve => setTimeout(resolve, 1000));
+                    
+                    // Track any pending login event (retroactively)
+                    if (pendingLoginEvent) {
+                        console.log('✅ Tracking pending login event retroactively...');
+                        segmentAnalytics.track(
+                            pendingLoginEvent.eventName,
+                            pendingLoginEvent.properties
+                        );
+                        console.log('✅ Login Completed tracked:', pendingLoginEvent.properties);
+                        pendingLoginEvent = null; // Clear it
+                    }
                     
                     const storedSessionId = getStoredSessionId();
                     
@@ -1852,7 +1956,8 @@
 
         // Cookie Consent Management
         function showCookieBanner() {
-            const consent = cookie.get('cookie_consent');
+            // Use localStorage instead of cookies for better local testing compatibility
+            const consent = localStorage.getItem('cookie_consent');
             if (!consent) {
                 document.getElementById('cookie-consent-banner').style.display = 'block';
             } else if (consent === 'accepted' && currentUser.userId) {
@@ -1862,16 +1967,21 @@
         }
 
         document.getElementById('accept-cookies').addEventListener('click', function() {
+            // Store in both localStorage (for reliability) and cookie (for compatibility)
+            localStorage.setItem('cookie_consent', 'accepted');
             cookie.set('cookie_consent', 'accepted', 365);
             document.getElementById('cookie-consent-banner').style.display = 'none';
             
+            console.log('✅ Cookie consent accepted');
             initializeAnalytics();
         });
 
         document.getElementById('decline-cookies').addEventListener('click', function() {
+            // Store in both localStorage and cookie
+            localStorage.setItem('cookie_consent', 'declined');
             cookie.set('cookie_consent', 'declined', 365);
             document.getElementById('cookie-consent-banner').style.display = 'none';
-            console.log('Analytics disabled - user declined cookies');
+            console.log('❌ Analytics disabled - user declined cookies');
         });
 
         // Don't auto-show banner on load - wait for login first
@@ -1891,33 +2001,91 @@
             }
         }
 
-        // Navigation Tracking
+        // Hash-based routing for separate pages (enables Amplitude Guides checklist linking)
+        function navigateToPage(pageName) {
+            // Update URL hash
+            window.location.hash = pageName;
+        }
+
+        function handleRouteChange() {
+            // Get current hash (remove the # symbol)
+            let hash = window.location.hash.substring(1);
+            
+            // Default to overview if no hash
+            if (!hash) {
+                hash = 'overview';
+            }
+            
+            // Map hash to page ID
+            const pageMap = {
+                'overview': 'overview',
+                'dashboard': 'overview', // Alias
+                'projects': 'projects',
+                'reports': 'reports',
+                'integrations': 'integrations',
+                'settings': 'settings'
+            };
+            
+            const targetPage = pageMap[hash] || 'overview';
+            
+            // Update active states in sidebar
+            document.querySelectorAll('.sidebar-nav').forEach(link => {
+                const linkPage = link.getAttribute('data-page');
+                if (linkPage === targetPage) {
+                    link.classList.add('active');
+                } else {
+                    link.classList.remove('active');
+                }
+            });
+            
+            // Show/hide pages
+            document.querySelectorAll('.page').forEach(page => {
+                page.classList.remove('active');
+            });
+            const targetPageElement = document.getElementById(targetPage + '-page');
+            if (targetPageElement) {
+                targetPageElement.classList.add('active');
+            }
+            
+            // Track page view
+            trackEvent('Page Viewed', {
+                page_name: targetPage,
+                page_title: 'Snyk - ' + targetPage,
+                url: window.location.href
+            });
+            
+            console.log('📄 Navigated to:', targetPage, '(URL:', window.location.href + ')');
+        }
+
+        // Listen for hash changes (browser back/forward buttons)
+        window.addEventListener('hashchange', handleRouteChange);
+
+        // Handle initial page load with hash
+        window.addEventListener('DOMContentLoaded', function() {
+            // Check if there's a hash on page load
+            if (window.location.hash) {
+                handleRouteChange();
+            } else {
+                // Set default hash
+                window.location.hash = 'overview';
+            }
+        });
+
+        // Navigation Click Tracking
         document.querySelectorAll('.sidebar-nav').forEach(link => {
             link.addEventListener('click', function(e) {
                 e.preventDefault();
                 const targetPage = this.getAttribute('data-page');
                 const tabText = this.textContent.trim();
                 
-                // Track the action (click)
+                // Track the click action
                 trackEvent('Side Menu Tab Clicked', {
                     section_clicked: targetPage,
                     tab_text: tabText
                 });
 
-                // Update active states
-                document.querySelectorAll('.sidebar-nav').forEach(l => l.classList.remove('active'));
-                this.classList.add('active');
-
-                // Show/hide pages
-                document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
-                document.getElementById(targetPage + '-page').classList.add('active');
-
-                // Track page view as explicit event (separate from action)
-                trackEvent('Page Viewed', {
-                    page_name: targetPage,
-                    page_title: 'Snyk - ' + targetPage,
-                    url: window.location.href + '#' + targetPage
-                });
+                // Navigate using hash routing (this will trigger handleRouteChange via hashchange event)
+                navigateToPage(targetPage);
             });
         });
 
@@ -2010,6 +2178,38 @@
                 });
             });
         }
+
+        // View Report Button Tracking (Reports page)
+        document.querySelectorAll('.view-report-btn').forEach(btn => {
+            btn.addEventListener('click', function(e) {
+                e.stopPropagation(); // Don't trigger card click
+                const reportType = this.getAttribute('data-report-type');
+                const reportTitle = this.getAttribute('data-report-title');
+                
+                trackEvent('View Report Clicked', {
+                    report_type: reportType,
+                    report_title: reportTitle,
+                    page: 'reports',
+                    current_plan: currentUser.plan
+                });
+            });
+        });
+
+        // Connect Integration Button Tracking (Integrations page)
+        document.querySelectorAll('.connect-integration-btn').forEach(btn => {
+            btn.addEventListener('click', function(e) {
+                e.stopPropagation(); // Don't trigger card click
+                const integrationType = this.getAttribute('data-integration-type');
+                const integrationName = this.getAttribute('data-integration-name');
+                
+                trackEvent('Connect Integration Clicked', {
+                    integration_type: integrationType,
+                    integration_name: integrationName,
+                    page: 'integrations',
+                    current_plan: currentUser.plan
+                });
+            });
+        });
 
         // Header Navigation Link Tracking
         document.querySelectorAll('.nav-link').forEach(link => {
@@ -2117,6 +2317,16 @@
                 // Handle logout
                 if (action === 'log-out') {
                     e.preventDefault();
+                    
+                    // Clear login state from localStorage
+                    localStorage.removeItem('snyk_auth_state');
+                    console.log('🗑️ Login state cleared from localStorage');
+                    
+                    // Clear current user
+                    currentUser.userId = null;
+                    currentUser.email = null;
+                    currentUser.name = null;
+                    
                     // Reload page to show login screen again
                     location.reload();
                 }
